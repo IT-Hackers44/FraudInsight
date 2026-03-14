@@ -7,6 +7,21 @@ from faker import Faker
 
 fake = Faker()
 
+def convert_numpy_types(obj):
+    """Recursively convert all NumPy types to Python native types"""
+    if isinstance(obj, np.integer):
+        return int(obj)
+    elif isinstance(obj, np.floating):
+        return float(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif isinstance(obj, dict):
+        return {k: convert_numpy_types(v) for k, v in obj.items()}
+    elif isinstance(obj, (list, tuple)):
+        return [convert_numpy_types(item) for item in obj]
+    return obj
+
+
 class TransactionGenerator:
     def __init__(self, seed: int = 42):
         """Initialize generator with optional seed for reproducibility"""
@@ -140,21 +155,14 @@ def generate_fraud_transactions(size: int = 10000) -> List[Dict]:
     generator = TransactionGenerator()
     transactions = generator.generate_transactions(size)
 
-    # Convert datetime to ISO string and numpy types to python native types
+    # Convert all values: datetime to ISO string and NumPy types to Python native types
+    result = []
     for tx in transactions:
-        tx['timestamp'] = tx['timestamp'].isoformat()
-        # Convert numpy types to Python native types for database compatibility
-        tx['amount'] = float(tx['amount'])
-        tx['amount_zscore'] = float(tx['amount_zscore'])
-        tx['location_lat'] = float(tx['location_lat'])
-        tx['location_lon'] = float(tx['location_lon'])
-        tx['velocity_1h'] = int(tx['velocity_1h'])
-        tx['velocity_24h'] = int(tx['velocity_24h'])
-        tx['time_since_last_tx'] = int(tx['time_since_last_tx'])
-        tx['is_international'] = bool(tx['is_international'])
-        tx['fraud_label'] = bool(tx['fraud_label'])
+        tx = convert_numpy_types(tx)
+        tx['timestamp'] = tx['timestamp'].isoformat() if isinstance(tx['timestamp'], datetime) else tx['timestamp']
+        result.append(tx)
 
-    return transactions
+    return result
 
 if __name__ == "__main__":
     transactions = generate_fraud_transactions(100)
