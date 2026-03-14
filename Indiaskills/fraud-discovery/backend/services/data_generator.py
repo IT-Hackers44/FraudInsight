@@ -120,28 +120,39 @@ class TransactionGenerator:
     def _generate_amount(self, fraud_pattern: str = None) -> float:
         """Generate transaction amount based on fraud pattern"""
         if fraud_pattern == "dormant_account":
-            return random.uniform(1000, 5000)
+            return float(random.uniform(1000, 5000))
         elif fraud_pattern == "night_owl":
-            return random.uniform(500, 3000)
+            return float(random.uniform(500, 3000))
         elif fraud_pattern == "round_trip":
-            return random.uniform(500, 2000)
+            return float(random.uniform(500, 2000))
         elif fraud_pattern == "merchant_collusion":
-            return random.uniform(100, 500)
+            return float(random.uniform(100, 500))
         elif fraud_pattern == "micro_test_sweep":
-            return random.uniform(10, 100) if random.random() < 0.5 else random.uniform(2000, 5000)
+            amount = random.uniform(10, 100) if random.random() < 0.5 else random.uniform(2000, 5000)
+            return float(amount)
         else:
             # Normal transaction with some skew
             amount = np.random.gamma(shape=2, scale=50)
-            return min(amount, 5000)  # Cap at 5000
+            return float(min(amount, 5000))  # Cap at 5000
 
 def generate_fraud_transactions(size: int = 10000) -> List[Dict]:
     """Public function to generate transactions"""
     generator = TransactionGenerator()
     transactions = generator.generate_transactions(size)
 
-    # Convert datetime to ISO string for JSON serialization
+    # Convert datetime to ISO string and numpy types to python native types
     for tx in transactions:
         tx['timestamp'] = tx['timestamp'].isoformat()
+        # Convert numpy types to Python native types for database compatibility
+        tx['amount'] = float(tx['amount'])
+        tx['amount_zscore'] = float(tx['amount_zscore'])
+        tx['location_lat'] = float(tx['location_lat'])
+        tx['location_lon'] = float(tx['location_lon'])
+        tx['velocity_1h'] = int(tx['velocity_1h'])
+        tx['velocity_24h'] = int(tx['velocity_24h'])
+        tx['time_since_last_tx'] = int(tx['time_since_last_tx'])
+        tx['is_international'] = bool(tx['is_international'])
+        tx['fraud_label'] = bool(tx['fraud_label'])
 
     return transactions
 
