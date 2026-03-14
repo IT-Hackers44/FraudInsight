@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker, Session
 from datetime import datetime
 
 # SQLite for dev, PostgreSQL for prod
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://neondb_owner:npg_WhG3EcMw2Pvf@ep-cold-cherry-am62wycn-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./fraud_discovery.db")
 
 if DATABASE_URL.startswith("sqlite"):
     engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
