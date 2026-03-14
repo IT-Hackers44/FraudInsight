@@ -16,7 +16,13 @@ init_db()
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173", "*"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:5173",
+        "https://fraudinsight.vercel.app",  # Update with your Vercel domain
+        "*"  # Allow all (will be overridden by specific domains above if not using wildcard)
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
